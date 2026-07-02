@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>JSON Inspector Panel</title>
+  <link rel="stylesheet" href="panel-base.css" />
+  <link rel="stylesheet" href="panel-tree.css" />
+  <link rel="stylesheet" href="panel-timer.css" />
+  <link rel="stylesheet" href="panel-repair.css" />
+  <link rel="stylesheet" href="panel-diff.css" />
+  <link rel="stylesheet" href="panel-escape.css" />
+  <link rel="stylesheet" href="panel-chart.css" />
+</head>
+<body>
+  <div id="app">
+    <main id="main">
+      <div id="toolbar">
+        <div class="logo">
+          <span class="logo-icon">{}</span>
+          <span class="logo-text">JSON Inspector</span>
+        </div>
+        <div class="toolbar-left" id="state-tabs">
+          <button class="tab-btn active" data-tab="raw">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <polyline points="16 18 22 12 16 6" />
+              <polyline points="8 6 2 12 8 18" />
+            </svg>
+            <span>Raw JSON</span>
+          </button>
+          <button class="tab-btn" data-tab="state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <ellipse cx="12" cy="5" rx="9" ry="3" />
+              <path d="M3 5v6c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+              <path d="M3 11v6c0 1.66 4 3 9 3s9-1.34 9-3v-6" />
+            </svg>
+            <span>Tree</span>
+          </button>
+          <button class="tab-btn" data-tab="chart">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <line x1="6" y1="20" x2="6" y2="12" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="18" y1="20" x2="18" y2="9" />
+            </svg>
+            <span>Chart</span>
+          </button>
+          <button class="tab-btn" data-tab="repair">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+            </svg>
+            <span>Repair</span>
+          </button>
+          <button class="tab-btn" data-tab="diff">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M8 3v18" />
+              <path d="M16 3v18" />
+              <path d="M3 9h5" />
+              <path d="M3 15h5" />
+              <path d="M16 9h5" />
+              <path d="M16 15h5" />
+            </svg>
+            <span>Diff</span>
+          </button>
+          <button class="tab-btn" data-tab="escape">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M4 7V4h16v3" />
+              <path d="M5 20h6" />
+              <path d="M13 4 8 20" />
+            </svg>
+            <span>Escape</span>
+          </button>
+          <button class="tab-btn" data-tab="timer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="12" cy="13" r="8" />
+              <path d="M12 9v4l2 2" />
+              <path d="M9 2h6" />
+              <path d="M12 2v3" />
+            </svg>
+            <span>Timer</span>
+          </button>
+        </div>
+        <div class="toolbar-right">
+          <input id="search" type="text" placeholder="🔍 Filter JSON…" />
+          <button id="btn-format" title="Beautify JSON">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7V4h16v3" />
+              <path d="M9 20h6" />
+              <path d="M12 4v16" />
+            </svg>
+          </button>
+          <button id="btn-export" title="Export JSON as file">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+          <button id="btn-clear" title="Clear">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              <path d="M10 11v6"/>
+              <path d="M14 11v6"/>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="content">
+        <div id="state-view-wrap" class="full-width">
+          <div id="raw-editor" class="hidden">
+            <div id="raw-gutter"><div id="raw-gutter-inner">1</div></div>
+            <div id="raw-editor-scroll">
+              <pre id="raw-highlight"><code></code></pre>
+              <textarea id="raw-input" placeholder='Paste or type JSON here, e.g. { "name": "demo", "count": 3 }' spellcheck="false"></textarea>
+            </div>
+            <button class="pane-copy-btn" id="btn-copy-raw" title="Copy raw JSON">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+            </button>
+          </div>
+          <div id="tree-view-wrap" class="hidden">
+            <div id="state-content"></div>
+            <button class="pane-copy-btn" id="btn-copy-tree" title="Copy tree JSON">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+            </button>
+          </div>
+          <div id="chart-view-wrap" class="hidden">
+            <div id="chart-content"></div>
+            <button class="pane-copy-btn" id="btn-copy-chart" title="Copy chart JSON">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+            </button>
+          </div>
+          <div id="repair-content" class="hidden">
+            <div id="repair-panes">
+              <div class="repair-pane">
+                <div class="repair-pane-header">
+                  <span>Broken JSON</span>
+                  <span id="repair-char-count" class="repair-char-count">0 chars</span>
+                </div>
+                <div class="repair-editor-wrap" id="repair-editor-wrap-input">
+                  <textarea id="repair-input" placeholder="Paste broken JSON here…" spellcheck="false"></textarea>
+                </div>
+                <button class="pane-copy-btn" id="repair-copy-input" title="Copy">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+                <div class="diff-field-error hidden" id="repair-error-input">Broken JSON is required</div>
+              </div>
+              <div class="repair-pane">
+                <div class="repair-pane-header">
+                  <span>Repaired JSON</span>
+                </div>
+                <div class="repair-editor-wrap">
+                  <pre id="repair-output"><code></code></pre>
+                </div>
+                <button class="pane-copy-btn" id="repair-copy-output" title="Copy">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div id="repair-actions">
+              <button id="btn-repair">Repair JSON</button>
+              <span id="repair-status"></span>
+            </div>
+
+            <div id="repair-log" class="hidden">
+              <div id="repair-log-title">Repairs Made:</div>
+              <ul id="repair-log-list"></ul>
+            </div>
+          </div>
+          <div id="diff-content" class="hidden">
+            <div id="diff-panes">
+              <div class="diff-pane">
+                <div class="diff-pane-header">Original JSON</div>
+                <div class="diff-editor" id="diff-editor-a">
+                  <div class="diff-gutter" id="diff-gutter-a"><div class="diff-gutter-inner">1</div></div>
+                  <div class="diff-editor-scroll" id="diff-scroll-a">
+                    <pre class="diff-highlight" id="diff-highlight-a"><code></code></pre>
+                    <textarea id="diff-input-a" placeholder="Paste original JSON here…" spellcheck="false"></textarea>
+                  </div>
+                </div>
+                <button class="pane-copy-btn" id="btn-copy-diff-a" title="Copy original JSON">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+                <div class="diff-field-error hidden" id="diff-error-a">Original JSON is required</div>
+              </div>
+              <div class="diff-pane">
+                <div class="diff-pane-header">Modified JSON</div>
+                <div class="diff-editor" id="diff-editor-b">
+                  <div class="diff-gutter" id="diff-gutter-b"><div class="diff-gutter-inner">1</div></div>
+                  <div class="diff-editor-scroll" id="diff-scroll-b">
+                    <pre class="diff-highlight" id="diff-highlight-b"><code></code></pre>
+                    <textarea id="diff-input-b" placeholder="Paste modified JSON here…" spellcheck="false"></textarea>
+                  </div>
+                </div>
+                <button class="pane-copy-btn" id="btn-copy-diff-b" title="Copy modified JSON">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+                <div class="diff-field-error hidden" id="diff-error-b">Modified JSON is required</div>
+              </div>
+            </div>
+
+            <div id="diff-actions">
+              <button id="btn-diff-compare">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3v18" />
+                  <path d="M7 3v18" />
+                  <path d="M3 9h4" />
+                  <path d="M17 9h4" />
+                  <path d="M3 15h4" />
+                  <path d="M17 15h4" />
+                </svg>
+                <span>Compare</span>
+              </button>
+              <button id="btn-diff-clear">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                </svg>
+                <span>Clear</span>
+              </button>
+              <span id="diff-summary"></span>
+            </div>
+
+            <div id="diff-result" class="hidden">
+              <div id="diff-result-title">Differences</div>
+              <pre id="diff-result-body"></pre>
+            </div>
+          </div>
+          <div id="escape-content" class="hidden">
+            <div id="escape-panes">
+              <div class="diff-pane">
+                <div class="diff-pane-header">Input JSON</div>
+                <div class="diff-editor" id="escape-editor-in">
+                  <div class="diff-gutter" id="escape-gutter-in"><div class="diff-gutter-inner">1</div></div>
+                  <div class="diff-editor-scroll" id="escape-scroll-in">
+                    <pre class="diff-highlight" id="escape-highlight-in"><code></code></pre>
+                    <textarea id="escape-input" placeholder="Paste JSON or an escaped string here…" spellcheck="false"></textarea>
+                  </div>
+                </div>
+                <button class="pane-copy-btn" id="btn-copy-escape-in" title="Copy input">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+                <div class="diff-field-error hidden" id="escape-error-in">Input is required</div>
+              </div>
+              <div class="diff-pane">
+                <div class="diff-pane-header">Stringified Output</div>
+                <div class="diff-editor" id="escape-editor-out">
+                  <div class="diff-gutter" id="escape-gutter-out"><div class="diff-gutter-inner">1</div></div>
+                  <div class="diff-editor-scroll" id="escape-scroll-out">
+                    <pre class="diff-highlight" id="escape-highlight-out"><code></code></pre>
+                  </div>
+                </div>
+                <button class="pane-copy-btn" id="btn-copy-escape-out" title="Copy output">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div id="escape-actions">
+              <button id="btn-escape-run">Stringify JSON</button>
+              <button id="btn-escape-clear">Clear</button>
+            </div>
+          </div>
+          <div id="timer-content" class="hidden"></div>
+        </div>
+      </div>
+
+      <div id="parse-error" class="hidden"></div>
+
+      <div id="footer">
+        <span class="footer-version" id="logo-version">v1.7.0</span>
+      </div>
+    </main>
+  </div>
+  <div id="copy-toast" aria-live="polite">✓ Copied to clipboard</div>
+  <script src="panel-core.js"></script>
+  <script src="panel-tree.js"></script>
+  <script src="panel-icons.js"></script>
+  <script src="panel-chart.js"></script>
+  <script src="panel-timer.js"></script>
+  <script src="panel-events.js"></script>
+  <script src="panel-repair.js"></script>
+  <script src="panel-diff.js"></script>
+  <script src="panel-escape.js"></script>
+  <script src="panel-boot.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+/* ── Chart Tab ───────────────────────────────────────────────────────────── */
+#chart-view-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+#chart-view-wrap.hidden { display: none !important; }
+
+#chart-content {
+  flex: 1;
+  overflow: auto;
+  padding: 24px 20px;
+  background: var(--bg);
+}
+
+/* SVG edges (bezier curves connecting parent → child) */
+.chart-edge {
+  stroke: #2e3650;
+  stroke-width: 1.2;
+  fill: none;
+}
+
+/* Branch node = has children → pink solid + outer glow */
+.chart-node-branch {
+  fill: #ff7eaa;
+  stroke: none;
+  filter: drop-shadow(0 0 5px rgba(255, 126, 170, .95))
+          drop-shadow(0 0 2px #ff7eaa);
+}
+
+/* Leaf node = primitive value → green solid + outer glow */
+.chart-node-leaf {
+  fill: #06d6a0;
+  stroke: none;
+  filter: drop-shadow(0 0 5px rgba(6, 214, 160, .95))
+          drop-shadow(0 0 2px #06d6a0);
+}
+
+/* Collapsed branch node — hollow dashed ring (clearly shows hidden children) */
+.chart-node-branch.chart-node-collapsed {
+  fill: var(--bg);
+  stroke: #ff7eaa;
+  stroke-width: 2;
+  stroke-dasharray: 3 2;
+  filter: none;
+}
+
+/* Clickable group hover — subtle highlight */
+.chart-node-group:hover .chart-node-branch,
+.chart-node-group:hover .chart-node-leaf {
+  opacity: 0.8;
+}
+
+/* ▸ / ▾ arrow tspan on branch node labels */
+.chart-arrow {
+  fill: var(--text3);
+  font-size: 9px;
+}
+
+/* Key name label — small mono font */
+.chart-label {
+  fill: var(--text);
+  font-size: 10px;
+  font-family: var(--font-mono);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Inline value tspan */
+.chart-val       { font-size: 9px; opacity: .75; }
+.chart-val-str   { fill: #86efac; }
+.chart-val-num   { fill: #fca5a5; }
+.chart-val-bool  { fill: #fdba74; }
+.chart-val-null  { fill: var(--text3); font-style: italic; }
+.chart-val-dim   { fill: var(--text3); }

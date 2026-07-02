@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>JSON Inspector</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 280px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 12px;
+      background: #0f1117;
+      color: #e2e8f0;
+    }
+    .header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px;
+      background: #171b26;
+      border-bottom: 1px solid #2a2f42;
+    }
+    .header-icon { font-size: 22px; }
+    .header-title { font-size: 14px; font-weight: 700; color: #ff6b35; }
+    .header-sub { font-size: 10px; color: #8892a4; margin-top: 1px; }
+    .section { padding: 14px 16px; border-bottom: 1px solid #2a2f42; }
+    .section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #4a5568; margin-bottom: 8px; }
+    .tip { color: #8892a4; line-height: 1.6; margin-bottom: 6px; }
+    code {
+      background: #1e2333; padding: 1px 5px; border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace; color: #ff6b35; font-size: 11px;
+    }
+    .open-btn {
+      display: block; width: 100%; padding: 10px;
+      background: #ff6b35; color: #fff; border: none;
+      border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;
+      margin-top: 10px; transition: background .15s;
+    }
+    .open-btn:hover { background: #e55a28; }
+    .footer { padding: 10px 16px; color: #4a5568; font-size: 10px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="header-icon">{}</span>
+    <div>
+      <div class="header-title">JSON Inspector</div>
+      <div class="header-sub">Beautify &amp; explore JSON</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">How to use</div>
+    <p class="tip">1. Open <strong>DevTools</strong> (F12)</p>
+    <p class="tip">2. Click the <strong>"JSON Inspector"</strong> tab</p>
+    <p class="tip">3. Paste JSON into the <strong>Raw JSON</strong> box</p>
+    <p class="tip">4. Switch to <strong>Tree</strong> or <strong>Chart</strong> to explore it</p>
+  </div>
+
+  <div class="section">
+    <button class="open-btn" id="open-devtools">Open DevTools → JSON Inspector Tab</button>
+  </div>
+
+  <div class="footer" id="popup-version">v1.7.0 · JSON Inspector Extension</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

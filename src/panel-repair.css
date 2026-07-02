@@ -1,0 +1,123 @@
+/* ── Repair Tab ──────────────────────────────────────────────────────────── */
+#repair-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+#repair-content.hidden { display: none !important; }
+
+#repair-panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  min-height: 260px;
+}
+
+.repair-pane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg2);
+}
+/* .repair-pane has its own header, so its copy button sits just below it,
+   not at the pane's top edge like Raw JSON/Tree/Chart's copy buttons. */
+.repair-pane > .pane-copy-btn { top: 42px; }
+
+.repair-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.repair-char-count { font-size: 10px; font-weight: 400; color: var(--text3); font-family: var(--font-mono); }
+
+.repair-editor-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 220px;
+  background: var(--bg);
+  border: 1px solid transparent;
+  transition: border-color .15s;
+}
+.repair-editor-wrap.is-invalid { border-color: var(--red); }
+
+#repair-input,
+#repair-output {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 20px;
+  white-space: pre;
+  overflow: auto;
+}
+#repair-output code { font: inherit; }
+
+#repair-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#btn-repair {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 1.75rem;
+  padding: 0 12px;
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+#btn-repair:hover { background: var(--bg2); border-color: var(--text2); }
+
+#repair-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+#repair-status.success { color: var(--green); }
+#repair-status.error { color: var(--red); }
+#repair-status:empty { display: none; }
+
+#repair-log {
+  border: 1px solid rgba(6, 214, 160, .35);
+  background: rgba(6, 214, 160, .06);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+#repair-log.hidden { display: none; }
+#repair-log-title { color: var(--green); font-weight: 600; font-size: 12px; margin-bottom: 8px; }
+#repair-log-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+#repair-log-list li {
+  font-size: 12px; color: var(--text);
+  display: flex; align-items: center; gap: 6px;
+}
+#repair-log-list li::before { content: '✓'; color: var(--green); font-weight: 700; }

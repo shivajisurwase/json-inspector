@@ -1,0 +1,171 @@
+/* ── JSON Tree ───────────────────────────────────────────────────────────── */
+.json-tree { list-style: none; }
+.json-tree li { margin: 0; }
+
+.jt-key { color: #7dd3fc; }
+.jt-str { color: #86efac; }
+.jt-num { color: #fca5a5; }
+.jt-bool { color: #fdba74; }
+.jt-null { color: var(--text2); font-style: italic; }
+.jt-brace { color: var(--text2); }
+.jt-count { color: var(--text3); font-size: 10px; margin-left: 5px; }
+
+.jt-row {
+  display: flex;
+  align-items: center;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+.jt-row:hover { background: var(--bg3); }
+
+.jt-collapsible { cursor: pointer; display: flex; align-items: center; }
+.jt-arrow {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 14px; height: 14px; flex-shrink: 0;
+  color: var(--text3);
+  transition: transform .12s;
+}
+.jt-arrow svg { width: 9px; height: 9px; }
+.jt-collapsible .jt-arrow { transform: rotate(90deg); }
+.jt-collapsible.collapsed .jt-arrow { transform: rotate(0deg); }
+
+.jt-children { padding-left: 17px; }
+.jt-children.hidden { display: none; }
+
+/* ── Search: non-matching ancestor summary + highlighted matches ───────────── */
+.jt-summary-row { cursor: default; }
+.jt-summary-row:hover { background: none; }
+.jt-summary { color: var(--text2); font-style: italic; margin-left: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.jt-highlight {
+  background: rgba(255, 209, 102, .35);
+  color: var(--accent2);
+  border-radius: 2px;
+  font-style: normal;
+  padding: 0 1px;
+}
+
+.diff-empty { color: var(--text3); font-style: italic; padding: 20px; text-align: center; }
+
+/* ── Raw JSON editor (gutter + highlighted overlay + transparent textarea) ── */
+#raw-editor {
+  position: relative;
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 20px;
+}
+#raw-editor.hidden { display: none !important; }
+
+#raw-gutter {
+  flex-shrink: 0;
+  width: 42px;
+  overflow: hidden;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  text-align: right;
+}
+#raw-gutter-inner {
+  padding: 12px 8px 12px 0;
+  color: var(--text3);
+  white-space: pre;
+}
+
+#raw-editor-scroll {
+  position: relative;
+  flex: 1;
+  overflow: auto;
+}
+
+#raw-highlight,
+#raw-input {
+  margin: 0;
+  padding: 12px 14px;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 20px;
+  white-space: pre;
+  word-wrap: normal;
+  overflow-wrap: normal;
+  tab-size: 2;
+}
+
+#raw-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  color: var(--text);
+  pointer-events: none;
+}
+#raw-highlight code { font: inherit; }
+
+#raw-input {
+  position: relative;
+  resize: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text);
+  overflow: hidden;
+  display: block;
+}
+#raw-input::selection { background: rgba(255, 107, 53, .35); }
+#raw-input::placeholder { color: var(--text3); }
+
+/* Syntax highlight token colors (Raw JSON editor) */
+.hl-key   { color: #7dd3fc; }
+.hl-str   { color: #86efac; }
+.hl-num   { color: #fca5a5; }
+.hl-bool  { color: #fdba74; }
+.hl-null  { color: var(--text2); font-style: italic; }
+.hl-punct { color: var(--text2); }
+
+/* ── Raw JSON status bar (valid / invalid) ──────────────────────────────── */
+#parse-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+}
+#parse-error.hidden { display: none; }
+
+#parse-error.is-valid {
+  color: var(--green);
+  background: rgba(6, 214, 160, .08);
+  border-top-color: rgba(6, 214, 160, .3);
+}
+#parse-error.is-invalid {
+  color: var(--red);
+  background: rgba(239, 71, 111, .08);
+  border-top-color: rgba(239, 71, 111, .3);
+}
+
+.status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  font-size: 9px;
+  flex-shrink: 0;
+}
+#parse-error.is-valid .status-icon { background: rgba(6, 214, 160, .18); }
+#parse-error.is-invalid .status-icon { background: rgba(239, 71, 111, .18); }
+
+.status-label { font-weight: 600; flex-shrink: 0; }
+.status-details { color: var(--text2); font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── state-content hidden (used when chart/timer tab is active) ───────────── */
+#state-content.hidden { display: none !important; }

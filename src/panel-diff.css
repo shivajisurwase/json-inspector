@@ -1,0 +1,186 @@
+/* ── Diff Tab ────────────────────────────────────────────────────────────── */
+#diff-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+#diff-content.hidden { display: none !important; }
+
+#diff-panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  min-height: 260px;
+}
+
+.diff-pane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg2);
+}
+/* .diff-pane has its own header, so its copy button sits just below it,
+   not at the pane's top edge like Raw JSON/Tree/Chart's copy buttons. */
+.diff-pane > .pane-copy-btn { top: 42px; }
+
+.diff-pane-header {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.diff-editor {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-height: 220px;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 20px;
+  border: 1px solid transparent;
+  transition: border-color .15s;
+}
+.diff-editor.is-invalid { border-color: var(--red); }
+
+.diff-field-error {
+  color: var(--red);
+  font-size: 11px;
+  padding: 6px 12px 0;
+}
+.diff-field-error.hidden { display: none; }
+
+.diff-gutter {
+  flex-shrink: 0;
+  width: 36px;
+  overflow: hidden;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  text-align: right;
+}
+.diff-gutter-inner {
+  padding: 10px 6px 10px 0;
+  color: var(--text3);
+  white-space: pre;
+}
+
+.diff-editor-scroll {
+  position: relative;
+  flex: 1;
+  overflow: auto;
+}
+
+.diff-highlight,
+#diff-input-a,
+#diff-input-b {
+  margin: 0;
+  padding: 10px 12px;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 20px;
+  white-space: pre;
+  word-wrap: normal;
+  overflow-wrap: normal;
+  tab-size: 2;
+}
+
+.diff-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  color: var(--text);
+  pointer-events: none;
+}
+.diff-highlight code { font: inherit; }
+
+#diff-input-a,
+#diff-input-b {
+  position: relative;
+  resize: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text);
+  overflow: hidden;
+  display: block;
+}
+#diff-input-a::placeholder,
+#diff-input-b::placeholder { color: var(--text3); }
+#diff-input-a::selection,
+#diff-input-b::selection { background: rgba(255, 107, 53, .35); }
+
+#diff-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#btn-diff-compare,
+#btn-diff-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 1.75rem;
+  padding: 0 12px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+#btn-diff-compare svg, #btn-diff-clear svg { pointer-events: none; }
+
+#btn-diff-compare {
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+#btn-diff-compare:hover { background: var(--bg2); border-color: var(--text2); }
+
+#btn-diff-clear {
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+#btn-diff-clear:hover { background: var(--bg2); border-color: var(--text2); }
+
+#diff-summary { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 12px; }
+.diff-count-added { color: var(--green); font-weight: 600; }
+.diff-count-removed { color: var(--red); font-weight: 600; }
+
+#diff-result {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg2);
+  padding: 14px 16px;
+}
+#diff-result.hidden { display: none; }
+#diff-result-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+#diff-result-body {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.diff-row { padding: 1px 8px; border-radius: 3px; }
+.diff-row-added { background: rgba(6, 214, 160, .12); color: var(--green); }
+.diff-row-removed { background: rgba(239, 71, 111, .12); color: var(--red); text-decoration: line-through; text-decoration-color: rgba(239, 71, 111, .5); }
+.diff-row-same { color: var(--text2); font-style: italic; }
+.diff-row-error { color: var(--red); }

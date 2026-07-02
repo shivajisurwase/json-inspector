@@ -1,0 +1,131 @@
+/* ── Timer Tab ───────────────────────────────────────────────────────────── */
+#timer-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+#timer-content.hidden { display: none !important; }
+
+.timer-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px 20px;
+  gap: 24px;
+  width: 100%;
+}
+
+/* ── Display ── */
+.timer-display-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.timer-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text3);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+.timer-display {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--text);
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(255,107,53,.25);
+  user-select: none;
+}
+
+/* ── Controls ── */
+.timer-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.timer-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  min-width: 76px;
+}
+.timer-btn svg { pointer-events: none; flex-shrink: 0; }
+.timer-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+.timer-btn-start  { border-color: var(--green);  color: var(--green);  background: rgba(6,214,160,.07); }
+.timer-btn-start:hover:not(:disabled) { background: rgba(6,214,160,.16); }
+
+.timer-btn-stop   { border-color: var(--red);    color: var(--red);    background: rgba(239,71,111,.07); }
+.timer-btn-stop:hover { background: rgba(239,71,111,.16); }
+
+.timer-btn-reset  { border-color: var(--border); color: var(--text2); }
+.timer-btn-reset:hover { border-color: var(--text2); color: var(--text); }
+
+.timer-btn-lap    { border-color: var(--blue);   color: var(--blue);   background: rgba(17,138,178,.07); }
+.timer-btn-lap:hover:not(:disabled) { background: rgba(17,138,178,.16); }
+
+/* ── Lap List ── */
+.timer-laps {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timer-no-laps {
+  text-align: center;
+  color: var(--text3);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 16px 0;
+}
+
+.timer-lap-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 4px 10px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+.timer-lap-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  background: var(--bg2);
+  border: 1px solid transparent;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  transition: background .1s;
+}
+.timer-lap-row:hover { background: var(--bg3); }
+.timer-lap-row.timer-lap-latest {
+  border-color: var(--accent);
+  background: rgba(255,107,53,.06);
+}
+
+.timer-lap-num   { color: var(--text2); }
+.timer-lap-split { color: var(--accent2); font-weight: 600; }
+.timer-lap-total { color: var(--text3); text-align: right; }
