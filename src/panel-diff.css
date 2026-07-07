@@ -91,9 +91,9 @@
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 20px;
-  white-space: pre;
-  word-wrap: normal;
-  overflow-wrap: normal;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
   tab-size: 2;
 }
 

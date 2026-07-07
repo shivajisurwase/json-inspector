@@ -125,6 +125,15 @@ $('#btn-repair').addEventListener('click', () => {
   }
 });
 
+$('#btn-repair-clear').addEventListener('click', () => {
+  $repairInput.value = '';
+  $repairOutput.textContent = '';
+  setRepairInputInvalid(false);
+  setRepairStatus('', '');
+  renderRepairLog([]);
+  updateRepairCharCount();
+});
+
 $('#repair-copy-input').addEventListener('click', (e) => {
   copyToClipboard($repairInput.value, e.currentTarget);
 });
