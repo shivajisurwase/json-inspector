@@ -106,6 +106,16 @@
 }
 #raw-highlight code { font: inherit; }
 
+/* Persistent bracket-scope band shown on double-click, spanning { through } */
+#raw-block-highlight {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: rgba(90, 110, 140, .18);
+  pointer-events: none;
+}
+#raw-block-highlight.hidden { display: none; }
+
 #raw-input {
   position: relative;
   resize: none;
@@ -117,7 +127,7 @@
   overflow: hidden;
   display: block;
 }
-#raw-input::selection { background: rgba(255, 107, 53, .35); }
+#raw-input::selection { background: rgba(136, 146, 164, .5); }
 #raw-input::placeholder { color: var(--text3); }
 
 /* Syntax highlight token colors (Raw JSON editor) */

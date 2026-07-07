@@ -3,15 +3,42 @@ $rawInput.addEventListener('input', (e) => {
   state.raw = e.target.value;
   tryParse(state.raw);
   updateHighlight();
+  showBlockHighlight(state.raw, null);
 });
 
 $rawEditorScroll.addEventListener('scroll', syncEditorScroll);
+
+// Double-click directly on a {, }, [ or ] : draw a persistent band over the
+// whole enclosing block, from its opening brace line through its closing
+// brace line (VS Code-style bracket-scope highlight). Double-clicking
+// anything else (a key, value, etc.) is left as a normal word-select.
+$rawInput.addEventListener('dblclick', () => {
+  const text = $rawInput.value;
+  const pos = $rawInput.selectionStart;
+  const isBracket = (ch) => ch === '{' || ch === '}' || ch === '[' || ch === ']';
+  let bracketOffset = -1;
+  if (isBracket(text[pos])) bracketOffset = pos;
+  else if (isBracket(text[pos - 1])) bracketOffset = pos - 1;
+
+  if (bracketOffset === -1) {
+    showBlockHighlight(text, null);
+    return;
+  }
+  const range = findEnclosingBlockRange(text, bracketOffset);
+  showBlockHighlight(text, range);
+});
+
+// Any plain click (not part of the double-click) dismisses the band.
+$rawInput.addEventListener('click', () => {
+  showBlockHighlight($rawInput.value, null);
+});
 
 $('#btn-clear').addEventListener('click', () => {
   $rawInput.value = '';
   state.raw = '';
   tryParse('');
   updateHighlight();
+  showBlockHighlight(state.raw, null);
   renderStateView();
 });
 
@@ -22,6 +49,7 @@ $('#btn-format').addEventListener('click', () => {
   $rawInput.value = pretty;
   state.raw = pretty;
   updateHighlight();
+  showBlockHighlight(state.raw, null);
   renderStateView();
 });
 

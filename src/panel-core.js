@@ -19,6 +19,7 @@ const $rawInput      = $('#raw-input');
 const $rawHighlight  = $('#raw-highlight code');
 const $rawGutterInner= $('#raw-gutter-inner');
 const $rawEditorScroll = $('#raw-editor-scroll');
+const $rawBlockHighlight = $('#raw-block-highlight');
 const $stateContent= $('#state-content');
 const $parseError  = $('#parse-error');
 const $search      = $('#search');
@@ -72,6 +73,70 @@ function updateHighlight() {
 
 function syncEditorScroll() {
   $rawGutterInner.style.transform = `translateY(${-$rawEditorScroll.scrollTop}px)`;
+}
+
+/**
+ * Given raw JSON text and a cursor offset, find the { }/[ ] block enclosing
+ * that position and return a selection range expanded to full lines, so the
+ * opening/closing brace lines are included — like VS Code's block select.
+ * Returns null if the cursor isn't inside any object/array.
+ */
+function findEnclosingBlockRange(text, offset) {
+  const stack = [];
+  let inString = false;
+  let escaped = false;
+  let openIndex = -1;
+  let closeIndex = -1;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = true;
+    } else if (ch === '{' || ch === '[') {
+      stack.push(i);
+    } else if (ch === '}' || ch === ']') {
+      const start = stack.pop();
+      if (start === undefined) continue;
+      if (start <= offset && offset <= i && (openIndex === -1 || start > openIndex)) {
+        openIndex = start;
+        closeIndex = i;
+      }
+    }
+  }
+
+  if (openIndex === -1) return null;
+
+  const lineStart = text.lastIndexOf('\n', openIndex) + 1;
+  const nextNewline = text.indexOf('\n', closeIndex);
+  const lineEnd = nextNewline === -1 ? text.length : nextNewline;
+
+  return { start: lineStart, end: lineEnd };
+}
+
+// Must match #raw-highlight/#raw-input's line-height and top padding in panel-tree.css.
+const RAW_LINE_HEIGHT = 20;
+const RAW_PADDING_TOP = 12;
+
+/** Draw a persistent band over the lines spanned by [start, end), or hide it. */
+function showBlockHighlight(text, range) {
+  if (!range) {
+    $rawBlockHighlight.classList.add('hidden');
+    return;
+  }
+  const firstLine = text.slice(0, range.start).split('\n').length - 1;
+  const lineCount = text.slice(range.start, range.end).split('\n').length;
+
+  $rawBlockHighlight.style.top = `${RAW_PADDING_TOP + firstLine * RAW_LINE_HEIGHT}px`;
+  $rawBlockHighlight.style.height = `${lineCount * RAW_LINE_HEIGHT}px`;
+  $rawBlockHighlight.classList.remove('hidden');
 }
 
 // ─── Parsing ──────────────────────────────────────────────────────────────────
