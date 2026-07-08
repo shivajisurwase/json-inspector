@@ -10,23 +10,32 @@ function createMiniEditor(suffix) {
   const highlight = document.querySelector(`#diff-highlight-${suffix} code`);
   const gutterInner = document.querySelector(`#diff-gutter-${suffix} .diff-gutter-inner`);
   const scroll = document.getElementById(`diff-scroll-${suffix}`);
+  const updateHighlightIncremental = createIncrementalHighlighter(highlight);
 
+  let lastLineCount = -1;
   function update() {
     const text = input.value;
-    highlight.replaceChildren(highlightJson(text));
-    const lineCount = text.length ? text.split('\n').length : 1;
-    const lines = [];
-    for (let i = 1; i <= lineCount; i++) lines.push(i);
-    gutterInner.textContent = lines.join('\n');
+    updateHighlightIncremental(text);
+    const lineCount = countLines(text);
+    if (lineCount !== lastLineCount) {
+      lastLineCount = lineCount;
+      const lines = new Array(lineCount);
+      for (let i = 0; i < lineCount; i++) lines[i] = i + 1;
+      gutterInner.textContent = lines.join('\n');
+    }
     input.style.height = 'auto';
     input.style.height = `${input.scrollHeight}px`;
   }
+
+  // rAF-throttled so a large paste or fast typing repaints at most once per
+  // frame instead of once per keystroke — same technique as the Raw editor.
+  const updateThrottled = rafThrottle(update);
 
   function syncScroll() {
     gutterInner.style.transform = `translateY(${-scroll.scrollTop}px)`;
   }
 
-  input.addEventListener('input', update);
+  input.addEventListener('input', updateThrottled);
   scroll.addEventListener('scroll', syncScroll);
 
   return { input, update };

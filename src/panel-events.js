@@ -1,9 +1,15 @@
 // ─── Event Listeners (Raw JSON editor, toolbar buttons, search, tabs) ──────────
+// Syntax highlight + gutter repaint is rAF-throttled so a burst of keystrokes
+// (or a large paste) only pays for one repaint per animation frame instead of
+// one per keystroke — the native textarea itself is never blocked by this.
+const updateHighlightThrottled = rafThrottle(updateHighlight);
+
 $rawInput.addEventListener('input', (e) => {
   state.raw = e.target.value;
-  tryParse(state.raw);
-  updateHighlight();
+  tryParseQuiet(state.raw);
+  updateHighlightThrottled();
   showBlockHighlight(state.raw, null);
+  refreshStatusDebounced();
 });
 
 $rawEditorScroll.addEventListener('scroll', syncEditorScroll);
@@ -76,15 +82,90 @@ $('#btn-copy-chart').addEventListener('click', (e) => {
   copyToClipboard(text, e.currentTarget);
 });
 
+// Filtering re-walks the whole tree to find matches, so debounce it — otherwise
+// every keystroke in a large document re-runs a full subtree scan + rebuild.
+const renderStateViewDebounced = debounce(renderStateView, 150);
 $search.addEventListener('input', (e) => {
   state.searchQuery = e.target.value;
-  if (state.activeTab === 'state') renderStateView();
+  if (state.activeTab === 'state') renderStateViewDebounced();
 });
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
+document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
   btn.addEventListener('click', () => {
     state.activeTab = btn.dataset.tab;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.toggle('active', b === btn));
+    // renderStateView() shows a "Loading…" placeholder immediately and defers
+    // any expensive rebuild (e.g. a large Tree) to the next frame itself, so
+    // the tab switch always paints right away instead of looking stuck.
     renderStateView();
+    closeTabOverflowMenu();
   });
 });
+
+// ─── Responsive tab overflow: move tabs that don't fit into a "More" menu ──────
+const $stateTabs = document.getElementById('state-tabs');
+const $tabOverflow = document.getElementById('tab-overflow');
+const $tabOverflowBtn = document.getElementById('tab-overflow-btn');
+const $tabOverflowMenu = document.getElementById('tab-overflow-menu');
+// Fixed left-to-right order of the real tabs, independent of where each one
+// currently lives (inline in the bar, or moved into the overflow menu).
+const _allTabBtns = Array.from(document.querySelectorAll('.tab-btn[data-tab]'));
+
+function closeTabOverflowMenu() {
+  $tabOverflowMenu.classList.add('hidden');
+}
+
+function openTabOverflowMenu() {
+  // Anchor the (fixed-position) menu under the "More" button — computed here
+  // rather than in CSS since the menu lives outside #state-tabs now.
+  const rect = $tabOverflowBtn.getBoundingClientRect();
+  $tabOverflowMenu.style.top = `${rect.bottom}px`;
+  $tabOverflowMenu.style.left = 'auto';
+  $tabOverflowMenu.style.right = `${document.documentElement.clientWidth - rect.right}px`;
+  $tabOverflowMenu.classList.remove('hidden');
+}
+
+$tabOverflowBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if ($tabOverflowMenu.classList.contains('hidden')) openTabOverflowMenu();
+  else closeTabOverflowMenu();
+});
+
+document.addEventListener('click', (e) => {
+  // The menu is rendered as a sibling of #tab-overflow (not nested inside it)
+  // so its fixed positioning isn't clipped by #state-tabs — check both.
+  if (!$tabOverflow.contains(e.target) && !$tabOverflowMenu.contains(e.target)) {
+    closeTabOverflowMenu();
+  }
+});
+
+/** Move every tab back inline, then push back-to-front any that don't fit into the menu. */
+function layoutTabOverflow() {
+  $tabOverflow.classList.add('hidden');
+  _allTabBtns.forEach(btn => $stateTabs.insertBefore(btn, $tabOverflow));
+
+  // Available width excludes the overflow control itself; reserve its width
+  // up front so adding it back later never itself causes another overflow.
+  const containerWidth = $stateTabs.clientWidth;
+  const overflowBtnWidth = $tabOverflowBtn.offsetWidth || 34;
+
+  let used = 0;
+  let firstOverflowIndex = -1;
+  for (let i = 0; i < _allTabBtns.length; i++) {
+    used += _allTabBtns[i].offsetWidth;
+    const budget = i < _allTabBtns.length - 1 ? containerWidth - overflowBtnWidth : containerWidth;
+    if (used > budget) { firstOverflowIndex = i; break; }
+  }
+
+  if (firstOverflowIndex === -1) return; // everything fits, nothing to move
+
+  $tabOverflow.classList.remove('hidden');
+  $tabOverflowMenu.replaceChildren();
+  for (let i = firstOverflowIndex; i < _allTabBtns.length; i++) {
+    $tabOverflowMenu.appendChild(_allTabBtns[i]);
+  }
+}
+
+const layoutTabOverflowThrottled = rafThrottle(layoutTabOverflow);
+new ResizeObserver(layoutTabOverflowThrottled).observe($stateTabs);
+layoutTabOverflow();

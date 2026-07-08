@@ -128,6 +128,8 @@ body {
 
 #state-tabs {
   display: flex; align-items: stretch; height: 100%;
+  overflow: hidden; /* tabs pushed past the available width are moved into .tab-overflow by JS */
+  min-width: 0;
 }
 
 .tab-btn {
@@ -135,10 +137,42 @@ body {
   background: none; border: none; color: var(--text2);
   padding: 0 10px; cursor: pointer; font-size: 11px; font-weight: 500;
   border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+  flex-shrink: 0; white-space: nowrap;
 }
 .tab-btn svg { width: 14px; height: 14px; pointer-events: none; flex-shrink: 0; }
 .tab-btn:hover { color: var(--text); }
 .tab-btn.active { color: #149eca; border-bottom-color: #149eca; }
+
+/* ── Overflow "more tabs" menu ───────────────────────────────────────────── */
+.tab-overflow { position: relative; flex-shrink: 0; display: flex; align-items: stretch; }
+.tab-overflow.hidden { display: none; }
+.tab-overflow-btn { padding: 0 10px; }
+.tab-overflow-btn svg { width: 14px; height: 14px; }
+
+.tab-overflow-menu {
+  /* position: fixed with top/left set from JS (panel-events.js) using the
+     "More" button's bounding rect — #state-tabs clips overflow for the
+     tab-collapse mechanism, so an absolutely-positioned menu nested inside it
+     would be clipped too; fixed positioning escapes that entirely. */
+  position: fixed;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: 4px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+}
+.tab-overflow-menu.hidden { display: none; }
+.tab-overflow-menu .tab-btn {
+  height: 30px;
+  border-bottom: none;
+  border-radius: 4px;
+  justify-content: flex-start;
+}
+.tab-overflow-menu .tab-btn.active { background: var(--bg3); }
 
 #tree-view-wrap {
   position: relative;

@@ -64,11 +64,20 @@ function jtArrowIcon() {
   return svg;
 }
 
+// Above this many entries, a level renders in batches with a "Show more" row
+// instead of all at once — keeps a 10,000-item array from creating 10,000
+// live DOM rows the instant its parent is expanded.
+const JT_BATCH_SIZE = 200;
+
 /**
- * Build the tree DOM. Without `query`, renders everything normally.
- * With `query`, only rows that match (or contain a match) are shown: a
- * non-matching ancestor collapses to a one-line summary, and matching
- * rows are shown expanded with the matched substring highlighted.
+ * Build the tree DOM. Without `query`, renders everything normally, fully
+ * expanded. With `query`, only rows that match (or contain a match) are
+ * shown: a non-matching ancestor collapses to a one-line summary, and
+ * matching rows are shown expanded with the matched substring highlighted.
+ *
+ * Children are built eagerly (so the tree opens fully expanded, like
+ * before) — the JT_BATCH_SIZE cap below is what keeps a huge array/object
+ * from creating tens of thousands of DOM rows at once, not laziness.
  */
 function buildJsonTree(obj, depth = 0, query = null) {
   const ul = document.createElement('ul');
@@ -88,13 +97,22 @@ function buildJsonTree(obj, depth = 0, query = null) {
     ? obj.map((v, i) => [i, v])
     : Object.entries(obj);
 
-  entries.forEach(([k, v]) => {
+  appendJsonTreeBatch(ul, entries, 0, depth, query);
+  return ul;
+}
+
+/** Append entries[start:start+JT_BATCH_SIZE] to `ul`, with a "Show more" row if more remain. */
+function appendJsonTreeBatch(ul, entries, start, depth, query) {
+  const end = query ? entries.length : Math.min(start + JT_BATCH_SIZE, entries.length);
+
+  for (let idx = start; idx < end; idx++) {
+    const [k, v] = entries[idx];
     const isObj = v !== null && typeof v === 'object';
 
     if (query) {
       const directMatch = isDirectMatch(k, v, query);
       const descendantMatch = isObj && !directMatch && subtreeHasMatch(v, query);
-      if (!directMatch && !descendantMatch) return; // no match anywhere in this branch — skip entirely
+      if (!directMatch && !descendantMatch) continue; // no match anywhere in this branch — skip entirely
 
       if (isObj && !directMatch && descendantMatch) {
         // Ancestor doesn't match itself but contains a match — show as a
@@ -116,7 +134,7 @@ function buildJsonTree(obj, depth = 0, query = null) {
         children.className = 'jt-children json-tree';
         li.appendChild(children);
         ul.appendChild(li);
-        return;
+        continue;
       }
     }
 
@@ -147,6 +165,7 @@ function buildJsonTree(obj, depth = 0, query = null) {
       header.appendChild(count);
 
       row.appendChild(header);
+      li.appendChild(row);
 
       const children = buildJsonTree(v, depth + 1, query);
       children.className = 'jt-children json-tree';
@@ -154,7 +173,6 @@ function buildJsonTree(obj, depth = 0, query = null) {
         header.classList.toggle('collapsed');
         children.classList.toggle('hidden');
       });
-      li.appendChild(row);
       li.appendChild(children);
     } else {
       const row = document.createElement('div');
@@ -167,9 +185,22 @@ function buildJsonTree(obj, depth = 0, query = null) {
       li.appendChild(row);
     }
     ul.appendChild(li);
-  });
+  }
 
-  return ul;
+  if (end < entries.length) {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'jt-show-more';
+    const remaining = entries.length - end;
+    btn.textContent = `Show ${Math.min(JT_BATCH_SIZE, remaining)} more (${remaining} left)…`;
+    btn.addEventListener('click', () => {
+      li.remove();
+      appendJsonTreeBatch(ul, entries, end, depth, query);
+    });
+    li.appendChild(btn);
+    ul.appendChild(li);
+  }
 }
 
 /** Wrap the substring of `text` matching `query` (case-insensitive) in a highlight span. */

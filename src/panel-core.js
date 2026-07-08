@@ -12,6 +12,31 @@ const state = {
   searchQuery: '',
 };
 
+// ─── Timing helpers ────────────────────────────────────────────────────────────
+/** Delay calling `fn` until `ms` have passed with no further calls. */
+function debounce(fn, ms) {
+  let timer = null;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), ms);
+  };
+}
+
+/** Collapse calls within the same animation frame into one trailing call. */
+function rafThrottle(fn) {
+  let scheduled = false;
+  let lastArgs = null;
+  return (...args) => {
+    lastArgs = args;
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      fn(...lastArgs);
+    });
+  };
+}
+
 // ─── DOM refs ─────────────────────────────────────────────────────────────────
 const $ = (sel) => document.querySelector(sel);
 const $rawEditor    = $('#raw-editor');
@@ -54,19 +79,107 @@ function highlightJson(text) {
   return frag;
 }
 
+/** Count newlines directly instead of allocating a full split() array. */
+function countLines(text) {
+  if (!text) return 1;
+  let n = 1;
+  for (let i = 0; i < text.length; i++) if (text.charCodeAt(i) === 10) n++;
+  return n;
+}
+
+let _lastGutterLineCount = -1;
 function updateGutter(text) {
-  const lineCount = text.length ? text.split('\n').length : 1;
-  const lines = [];
-  for (let i = 1; i <= lineCount; i++) lines.push(i);
+  const lineCount = countLines(text);
+  if (lineCount === _lastGutterLineCount) return; // most keystrokes don't change the line count
+  _lastGutterLineCount = lineCount;
+  const lines = new Array(lineCount);
+  for (let i = 0; i < lineCount; i++) lines[i] = i + 1;
   $rawGutterInner.textContent = lines.join('\n');
 }
 
+// ─── Incremental highlight (one <div> per line, only changed lines rebuilt) ───
+// Re-tokenizing and rebuilding the *whole* document on every keystroke doesn't
+// scale — at a few thousand lines it can't finish inside a frame budget even
+// throttled to one repaint per frame. Since a keystroke almost always only
+// changes one line (or inserts/deletes a contiguous run of lines), each
+// highlighter diffs the new text's lines against what's already on screen and
+// patches just those, instead of rebuilding the whole document.
+function highlightLine(text) {
+  const div = document.createElement('div');
+  div.className = 'hl-line';
+  div.appendChild(highlightJson(text));
+  return div;
+}
+
+/** Create an independent incremental highlighter writing into `container`. */
+function createIncrementalHighlighter(container) {
+  let lineEls = [];   // one <div class="hl-line"> per line currently rendered
+  let lineTexts = []; // parallel array of each line's source text, kept in sync with lineEls
+
+  function update(text) {
+    const lines = text.split('\n');
+
+    if (lineEls.length === 0) {
+      // First render (or after a full reset) — build every line once.
+      const frag = document.createDocumentFragment();
+      lineEls = lines.map((line) => {
+        const div = highlightLine(line);
+        frag.appendChild(div);
+        return div;
+      });
+      lineTexts = lines.slice();
+      container.replaceChildren(frag);
+      return;
+    }
+
+    const old = lineEls;
+    const oldLineText = lineTexts;
+
+    // Matching prefix/suffix of unchanged lines bounds the edited region — a
+    // single keystroke leaves everything outside that region untouched.
+    let start = 0;
+    const maxStart = Math.min(old.length, lines.length);
+    while (start < maxStart && oldLineText[start] === lines[start]) start++;
+
+    let oldEnd = old.length;
+    let newEnd = lines.length;
+    while (oldEnd > start && newEnd > start && oldLineText[oldEnd - 1] === lines[newEnd - 1]) {
+      oldEnd--;
+      newEnd--;
+    }
+
+    const replacement = document.createDocumentFragment();
+    const newEls = [];
+    for (let i = start; i < newEnd; i++) {
+      const div = highlightLine(lines[i]);
+      replacement.appendChild(div);
+      newEls.push(div);
+    }
+
+    const toRemove = old.slice(start, oldEnd);
+    if (toRemove.length) {
+      const anchor = toRemove[0];
+      anchor.before(replacement);
+      toRemove.forEach(el => el.remove());
+    } else if (start < old.length) {
+      old[start].before(replacement);
+    } else {
+      container.appendChild(replacement);
+    }
+
+    lineEls = old.slice(0, start).concat(newEls, old.slice(oldEnd));
+    lineTexts = oldLineText.slice(0, start).concat(lines.slice(start, newEnd), oldLineText.slice(oldEnd));
+  }
+
+  return update;
+}
+
+const updateRawHighlight = createIncrementalHighlighter($rawHighlight);
+
 function updateHighlight() {
   const text = $rawInput.value;
-  $rawHighlight.replaceChildren(highlightJson(text));
+  updateRawHighlight(text);
   updateGutter(text);
-  // Grow the (invisible) textarea to fit its content so the highlight layer,
-  // textarea, and gutter all scroll together as one unit inside #raw-editor-scroll.
   $rawInput.style.height = 'auto';
   $rawInput.style.height = `${$rawInput.scrollHeight}px`;
 }
@@ -140,6 +253,11 @@ function showBlockHighlight(text, range) {
 }
 
 // ─── Parsing ──────────────────────────────────────────────────────────────────
+/**
+ * Parse `text` into `state.parsed` and refresh the status bar. `state.parsed`
+ * must always be current (Tree/Chart/etc. read it immediately), so parsing
+ * itself never gets debounced — only the more expensive stats walk below does.
+ */
 function tryParse(text) {
   const trimmed = text.trim();
   if (!trimmed) {
@@ -155,6 +273,37 @@ function tryParse(text) {
     showStatus({ ok: false, message: err.message });
   }
 }
+
+/** Same as tryParse, but skips the stats walk/status render (still sets state.parsed). */
+function tryParseQuiet(text) {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    state.parsed = undefined;
+    return;
+  }
+  try {
+    state.parsed = JSON.parse(trimmed);
+  } catch (err) {
+    state.parsed = undefined;
+  }
+}
+
+/** Recompute and render the status bar for the current state.raw/state.parsed. */
+function refreshStatus() {
+  const trimmed = state.raw.trim();
+  if (!trimmed) { showStatus(null); return; }
+  if (state.parsed === undefined) {
+    try {
+      JSON.parse(trimmed);
+    } catch (err) {
+      showStatus({ ok: false, message: err.message });
+      return;
+    }
+  }
+  showStatus({ ok: true, stats: computeJsonStats(state.parsed, trimmed) });
+}
+
+const refreshStatusDebounced = debounce(refreshStatus, 200);
 
 /** Walk a parsed JSON value and collect size/shape stats for the status bar. */
 function computeJsonStats(value, rawText) {
@@ -224,6 +373,11 @@ function showStatus(result) {
 }
 
 // ─── View switching ─────────────────────────────────────────────────────────────
+// Bumped on every Tree render request so a stale rAF callback (from a tab
+// switch or search edit that's since been superseded) can no-op instead of
+// clobbering a newer render.
+let _treeRenderToken = 0;
+
 function renderStateView() {
   const $treeWrap = document.getElementById('tree-view-wrap');
   const $chartWrap = document.getElementById('chart-view-wrap');
@@ -278,9 +432,9 @@ function renderStateView() {
 
   // Tree tab
   $treeWrap.classList.remove('hidden');
-  $stateContent.textContent = '';
 
   if (state.parsed === undefined) {
+    $stateContent.textContent = '';
     const hint = document.createElement('span');
     hint.style.color = 'var(--text3)';
     hint.textContent = state.raw.trim() ? 'Fix the JSON in the Raw JSON tab to see the tree' : 'Paste JSON in the Raw JSON tab to get started';
@@ -288,17 +442,32 @@ function renderStateView() {
     return;
   }
 
-  const q = state.searchQuery.trim().toLowerCase();
-  if (q) {
-    if (!subtreeHasMatch(state.parsed, q)) {
-      const empty = document.createElement('div');
-      empty.className = 'diff-empty';
-      empty.textContent = `No properties match "${state.searchQuery.trim()}"`;
-      $stateContent.appendChild(empty);
+  // Building the tree can take a moment on a large document — show a loading
+  // placeholder immediately, then build on the next frame so the browser gets
+  // to paint that placeholder first instead of the UI looking frozen.
+  $stateContent.textContent = '';
+  const loading = document.createElement('div');
+  loading.className = 'diff-empty';
+  loading.textContent = 'Loading…';
+  $stateContent.appendChild(loading);
+
+  const renderToken = ++_treeRenderToken;
+  requestAnimationFrame(() => {
+    if (renderToken !== _treeRenderToken) return; // a newer render superseded this one
+
+    const q = state.searchQuery.trim().toLowerCase();
+    $stateContent.textContent = '';
+    if (q) {
+      if (!subtreeHasMatch(state.parsed, q)) {
+        const empty = document.createElement('div');
+        empty.className = 'diff-empty';
+        empty.textContent = `No properties match "${state.searchQuery.trim()}"`;
+        $stateContent.appendChild(empty);
+      } else {
+        $stateContent.appendChild(buildJsonTree(state.parsed, 0, q));
+      }
     } else {
-      $stateContent.appendChild(buildJsonTree(state.parsed, 0, q));
+      $stateContent.appendChild(buildJsonTree(state.parsed));
     }
-  } else {
-    $stateContent.appendChild(buildJsonTree(state.parsed));
-  }
+  });
 }

@@ -24,6 +24,7 @@
 #escape-highlight-out code {
   font: inherit;
 }
+#escape-highlight-in code { display: block; }
 
 #escape-highlight-in,
 #escape-highlight-out {

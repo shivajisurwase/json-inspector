@@ -105,7 +105,7 @@
   color: var(--text);
   pointer-events: none;
 }
-.diff-highlight code { font: inherit; }
+.diff-highlight code { font: inherit; display: block; }
 
 #diff-input-a,
 #diff-input-b {

@@ -7,20 +7,34 @@ const $escapeScrollIn    = document.getElementById('escape-scroll-in');
 const $escapeHighlightOut= document.querySelector('#escape-highlight-out code');
 const $escapeGutterOut   = document.querySelector('#escape-gutter-out .diff-gutter-inner');
 
+// Gutters only need rebuilding when the line count actually changes — most
+// keystrokes don't add/remove a line — mirroring updateGutter() in panel-core.js.
+const _escapeGutterLineCounts = new WeakMap();
 function updateEscapeGutter(gutterEl, text) {
-  const lineCount = text.length ? text.split('\n').length : 1;
-  const lines = [];
-  for (let i = 1; i <= lineCount; i++) lines.push(i);
+  const lineCount = countLines(text);
+  if (_escapeGutterLineCounts.get(gutterEl) === lineCount) return;
+  _escapeGutterLineCounts.set(gutterEl, lineCount);
+  const lines = new Array(lineCount);
+  for (let i = 0; i < lineCount; i++) lines[i] = i + 1;
   gutterEl.textContent = lines.join('\n');
 }
 
+// Same incremental (line-diffed) highlighter as the Raw JSON/Diff editors —
+// re-tokenizing and rebuilding the whole textarea on every keystroke is what
+// made this tab hang on large input; only changed lines are rebuilt now.
+const updateEscapeHighlightIn = createIncrementalHighlighter($escapeHighlightIn);
+
 function updateEscapeInput() {
   const text = $escapeInput.value;
-  $escapeHighlightIn.replaceChildren(highlightJson(text));
+  updateEscapeHighlightIn(text);
   updateEscapeGutter($escapeGutterIn, text);
   $escapeInput.style.height = 'auto';
   $escapeInput.style.height = `${$escapeInput.scrollHeight}px`;
 }
+
+// rAF-throttled so a burst of keystrokes or a large paste repaints at most
+// once per animation frame instead of once per keystroke.
+const updateEscapeInputThrottled = rafThrottle(updateEscapeInput);
 
 let escapeOutputText = '';
 
@@ -31,7 +45,8 @@ function setEscapeOutput(text) {
 }
 
 $escapeInput.addEventListener('input', () => {
-  updateEscapeInput();
+  updateEscapeInputThrottled();
+  updateEscapeRunLabel();
   document.getElementById('escape-editor-in').classList.remove('is-invalid');
   document.getElementById('escape-error-in').classList.add('hidden');
 });
@@ -50,7 +65,14 @@ function looksLikeEscapedString(text) {
   return t.length >= 2 && t.startsWith('"') && t.endsWith('"');
 }
 
-$('#btn-escape-run').addEventListener('click', () => {
+const $escapeRunBtn = $('#btn-escape-run');
+
+/** Swap the run button's label to match what it'll actually do to the current input. */
+function updateEscapeRunLabel() {
+  $escapeRunBtn.textContent = looksLikeEscapedString($escapeInput.value) ? 'Parse JSON' : 'Stringify JSON';
+}
+
+$escapeRunBtn.addEventListener('click', () => {
   const raw = $escapeInput.value.trim();
   const $editorIn = document.getElementById('escape-editor-in');
   const $errorIn = document.getElementById('escape-error-in');
@@ -95,6 +117,7 @@ $('#btn-escape-run').addEventListener('click', () => {
 $('#btn-escape-clear').addEventListener('click', () => {
   $escapeInput.value = '';
   updateEscapeInput();
+  updateEscapeRunLabel();
   setEscapeOutput('');
   document.getElementById('escape-editor-in').classList.remove('is-invalid');
   document.getElementById('escape-error-in').classList.add('hidden');
@@ -108,4 +131,5 @@ $('#btn-copy-escape-out').addEventListener('click', (e) => {
 });
 
 updateEscapeInput();
+updateEscapeRunLabel();
 setEscapeOutput('');

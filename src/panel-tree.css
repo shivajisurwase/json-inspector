@@ -47,6 +47,17 @@
 
 .diff-empty { color: var(--text3); font-style: italic; padding: 20px; text-align: center; }
 
+.jt-show-more {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px 4px;
+}
+.jt-show-more:hover { text-decoration: underline; }
+
 /* ── Raw JSON editor (gutter + highlighted overlay + transparent textarea) ── */
 #raw-editor {
   position: relative;
@@ -104,7 +115,11 @@
   color: var(--text);
   pointer-events: none;
 }
-#raw-highlight code { font: inherit; }
+#raw-highlight code { font: inherit; display: block; }
+/* One block per source line for incremental highlight (panel-core.js
+   createIncrementalHighlighter) — inherits white-space from its container so
+   the Raw editor (pre, no wrap) and Diff editor (pre-wrap) both render right. */
+.hl-line { display: block; }
 
 /* Persistent bracket-scope band shown on double-click, spanning { through } */
 #raw-block-highlight {
