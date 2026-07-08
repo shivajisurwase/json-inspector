@@ -1,0 +1,100 @@
+/* ── Path Finder Tab ────────────────────────────────────────────────────── */
+#path-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+#path-content.hidden { display: none !important; }
+
+#path-hint { font-size: 12px; color: var(--text2); }
+#path-hint code {
+  font-family: var(--font-mono);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--text);
+}
+
+#path-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#path-input {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  outline: none;
+}
+#path-input:focus { border-color: var(--tab-active); }
+#path-input.no-match { border-color: var(--red); }
+
+#btn-path-find {
+  display: inline-flex;
+  align-items: center;
+  height: 1.75rem;
+  padding: 0 12px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border);
+  transition: background .15s, border-color .15s;
+}
+#btn-path-find:hover { background: var(--bg2); border-color: var(--text2); }
+
+#btn-path-copy:hover:not(:disabled) { border-color: var(--tab-active); color: var(--tab-active); }
+#btn-path-copy:disabled { opacity: .4; cursor: default; }
+
+#path-error {
+  font-size: 12px;
+  color: var(--red);
+  background: rgba(239, 71, 111, .1);
+  border: 1px solid rgba(239, 71, 111, .35);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+}
+#path-error.hidden { display: none; }
+
+#path-result-wrap {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg2);
+  padding: 12px 14px;
+}
+#path-result-wrap.hidden { display: none; }
+
+#path-result-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 6px;
+  padding-right: 32px; /* keep clear of the floating copy button, top-right */
+}
+
+#path-result {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+#path-result code { font: inherit; }

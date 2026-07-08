@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="panel-diff.css" />
   <link rel="stylesheet" href="panel-escape.css" />
   <link rel="stylesheet" href="panel-chart.css" />
+  <link rel="stylesheet" href="panel-path.css" />
 </head>
 <body>
   <div id="app">
@@ -35,6 +36,14 @@
               <path d="M3 11v6c0 1.66 4 3 9 3s9-1.34 9-3v-6" />
             </svg>
             <span>Tree</span>
+          </button>
+          <button class="tab-btn" data-tab="path">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <span>Path Finder</span>
           </button>
           <button class="tab-btn" data-tab="chart">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -97,7 +106,6 @@
              mechanism) and positioned via JS so the dropdown itself is never clipped. -->
         <div class="tab-overflow-menu hidden" id="tab-overflow-menu"></div>
         <div class="toolbar-right">
-          <input id="search" type="text" placeholder="🔍 Filter JSON…" />
           <button id="btn-format" title="Beautify JSON">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 7V4h16v3" />
@@ -179,6 +187,16 @@
             </button>
           </div>
           <div id="tree-view-wrap" class="hidden">
+            <div id="tree-search-bar" class="hidden">
+              <input id="search" type="text" placeholder="Search properties and values" spellcheck="false" />
+              <button id="btn-search-close" title="Close (Esc)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
             <div id="state-content"></div>
             <button class="pane-copy-btn" id="btn-copy-tree" title="Copy tree JSON">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -355,6 +373,28 @@
             </div>
           </div>
           <div id="timer-content" class="hidden"></div>
+          <div id="path-content" class="hidden">
+            <div id="path-hint">
+              Enter a JSON path like <code>$.users[0].name</code> or <code>data.items[2].id</code> to look up a value in the
+              parsed JSON from the Raw JSON tab.
+            </div>
+            <div id="path-input-row">
+              <input id="path-input" type="text" placeholder="$.users[0].name" spellcheck="false" autocomplete="off" />
+              <button id="btn-path-find">Find</button>
+            </div>
+            <div id="path-error" class="hidden"></div>
+            <div id="path-result-wrap" class="hidden">
+              <div id="path-result-label">Output</div>
+              <pre id="path-result"><code></code></pre>
+              <button class="pane-copy-btn" id="btn-path-copy" title="Copy value" disabled>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -377,6 +417,7 @@
   <script src="panel-diff.js"></script>
   <script src="panel-escape.js"></script>
   <script src="panel-find.js"></script>
+  <script src="panel-path.js"></script>
   <script src="panel-boot.js"></script>
 </body>
 </html>

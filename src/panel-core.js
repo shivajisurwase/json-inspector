@@ -385,9 +385,10 @@ function renderStateView() {
   const $repair = document.getElementById('repair-content');
   const $diff = document.getElementById('diff-content');
   const $escape = document.getElementById('escape-content');
+  const $path = document.getElementById('path-content');
 
-  // The filter box only applies to the Tree tab — hide it everywhere else.
-  $search.classList.toggle('hidden', state.activeTab !== 'state');
+  // The filter bar only applies to the Tree tab — force it closed everywhere else.
+  if (state.activeTab !== 'state') closeTreeSearchBar();
 
   $rawEditor.classList.add('hidden');
   $treeWrap.classList.add('hidden');
@@ -396,6 +397,7 @@ function renderStateView() {
   $repair.classList.add('hidden');
   $diff.classList.add('hidden');
   $escape.classList.add('hidden');
+  $path.classList.add('hidden');
 
   if (state.activeTab === 'raw') {
     $rawEditor.classList.remove('hidden');
@@ -427,6 +429,11 @@ function renderStateView() {
 
   if (state.activeTab === 'escape') {
     $escape.classList.remove('hidden');
+    return;
+  }
+
+  if (state.activeTab === 'path') {
+    $path.classList.remove('hidden');
     return;
   }
 

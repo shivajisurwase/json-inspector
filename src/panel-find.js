@@ -145,10 +145,17 @@ $btnFindClose.addEventListener('click', closeFindBar);
 
 document.addEventListener('keydown', (e) => {
   const isFindShortcut = (e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'f';
-  if (isFindShortcut && state.activeTab === 'raw' && document.activeElement !== $search) {
-    e.preventDefault();
-    openFindBar();
-    return;
+  if (isFindShortcut) {
+    if (state.activeTab === 'raw') {
+      e.preventDefault();
+      openFindBar();
+      return;
+    }
+    if (state.activeTab === 'state') {
+      e.preventDefault();
+      openTreeSearchBar();
+      return;
+    }
   }
   if (e.key === 'Escape' && !$findBar.classList.contains('hidden')) {
     closeFindBar();

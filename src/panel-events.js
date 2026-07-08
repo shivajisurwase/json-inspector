@@ -131,6 +131,27 @@ $search.addEventListener('input', (e) => {
   if (state.activeTab === 'state') renderStateViewDebounced();
 });
 
+// ─── Tree filter bar: floats over the Tree view, opened via Ctrl+F, closable ──
+const $treeSearchBar = document.getElementById('tree-search-bar');
+const $btnSearchClose = document.getElementById('btn-search-close');
+
+function openTreeSearchBar() {
+  if (state.activeTab !== 'state') return;
+  $treeSearchBar.classList.remove('hidden');
+  $search.focus();
+  $search.select();
+}
+
+function closeTreeSearchBar() {
+  $treeSearchBar.classList.add('hidden');
+}
+
+$btnSearchClose.addEventListener('click', closeTreeSearchBar);
+
+$search.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeTreeSearchBar();
+});
+
 document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
   btn.addEventListener('click', () => {
     state.activeTab = btn.dataset.tab;
@@ -182,6 +203,10 @@ document.addEventListener('click', (e) => {
 
 /** Move every tab back inline, then push back-to-front any that don't fit into the menu. */
 function layoutTabOverflow() {
+  // Always start from a clean slate: close the dropdown and reclaim any tabs
+  // it's currently holding, so a relayout never leaves it open-but-empty (or
+  // showing stale tabs) while the tabs it should contain are recomputed below.
+  closeTabOverflowMenu();
   $tabOverflow.classList.add('hidden');
   _allTabBtns.forEach(btn => $stateTabs.insertBefore(btn, $tabOverflow));
 
