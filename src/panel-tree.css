@@ -2,11 +2,11 @@
 .json-tree { list-style: none; }
 .json-tree li { margin: 0; }
 
-.jt-key { color: #7dd3fc; }
-.jt-str { color: #86efac; }
-.jt-num { color: #fca5a5; }
-.jt-bool { color: #fdba74; }
-.jt-null { color: var(--text2); font-style: italic; }
+.jt-key { color: #9cdcfe; }
+.jt-str { color: #ce9178; }
+.jt-num { color: #b5cea8; }
+.jt-bool { color: #569cd6; }
+.jt-null { color: #569cd6; font-style: italic; }
 .jt-brace { color: var(--text2); }
 .jt-count { color: var(--text3); font-size: 10px; margin-left: 5px; }
 
@@ -146,12 +146,96 @@
 #raw-input::placeholder { color: var(--text3); }
 
 /* Syntax highlight token colors (Raw JSON editor) */
-.hl-key   { color: #7dd3fc; }
-.hl-str   { color: #86efac; }
-.hl-num   { color: #fca5a5; }
-.hl-bool  { color: #fdba74; }
-.hl-null  { color: var(--text2); font-style: italic; }
+.hl-key   { color: #9cdcfe; }
+.hl-str   { color: #ce9178; }
+.hl-num   { color: #b5cea8; }
+.hl-bool  { color: #569cd6; }
+.hl-null  { color: #569cd6; font-style: italic; }
 .hl-punct { color: var(--text2); }
+
+/* ── Find & Replace bar (floats over the Raw JSON editor, VS Code-style) ──── */
+#find-replace-bar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  font-family: var(--font-ui);
+}
+#find-replace-bar.hidden { display: none; }
+
+.find-replace-row { display: flex; align-items: center; gap: 4px; }
+
+#find-input, #replace-input {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  width: 160px;
+  outline: none;
+}
+#find-input:focus, #replace-input:focus { border-color: var(--tab-active); }
+#find-input.no-match { border-color: var(--red); }
+
+#find-match-count {
+  font-size: 10px;
+  color: var(--text3);
+  min-width: 56px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+#find-replace-bar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 8px;
+  flex-shrink: 0;
+}
+#find-replace-bar button:hover { border-color: var(--tab-active); color: var(--tab-active); }
+#find-replace-bar button svg {
+  display: block;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  pointer-events: none;
+}
+#btn-find-prev, #btn-find-next, #btn-find-close { padding: 0; width: 22px; height: 22px; }
+
+.find-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text2);
+  cursor: pointer;
+  padding: 0 4px;
+  user-select: none;
+  flex-shrink: 0;
+}
+.find-option input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--tab-active);
+}
 
 /* ── Raw JSON status bar (valid / invalid) ──────────────────────────────── */
 #parse-error {

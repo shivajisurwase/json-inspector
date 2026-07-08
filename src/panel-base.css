@@ -8,6 +8,7 @@
   --border:    #2a2f42;
   --accent:    #ff6b35;
   --accent2:   #ffd166;
+  --tab-active: #149eca;
   --green:     #06d6a0;
   --red:       #ef476f;
   --blue:      #118ab2;
@@ -87,10 +88,13 @@ body {
   flex-shrink: 0;
 }
 #btn-format svg, #btn-export svg, #btn-clear svg { pointer-events: none; }
+#btn-export svg.hidden { display: none; }
 
 #btn-format:hover{ border-color: var(--blue);   color: var(--blue); }
 #btn-export:hover{ border-color: var(--accent); color: var(--accent); }
 #btn-clear:hover { border-color: var(--red);    color: var(--red); }
+
+#file-upload-input.hidden { display: none; }
 
 /* ── Copy toast notification ─────────────────────────────────────────────── */
 #copy-toast {
@@ -141,7 +145,7 @@ body {
 }
 .tab-btn svg { width: 14px; height: 14px; pointer-events: none; flex-shrink: 0; }
 .tab-btn:hover { color: var(--text); }
-.tab-btn.active { color: #149eca; border-bottom-color: #149eca; }
+.tab-btn.active { color: var(--tab-active); border-bottom-color: var(--tab-active); }
 
 /* ── Overflow "more tabs" menu ───────────────────────────────────────────── */
 .tab-overflow { position: relative; flex-shrink: 0; display: flex; align-items: stretch; }

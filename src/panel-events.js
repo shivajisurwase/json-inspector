@@ -10,6 +10,7 @@ $rawInput.addEventListener('input', (e) => {
   updateHighlightThrottled();
   showBlockHighlight(state.raw, null);
   refreshStatusDebounced();
+  updateExportButtonMode();
 });
 
 $rawEditorScroll.addEventListener('scroll', syncEditorScroll);
@@ -46,6 +47,7 @@ $('#btn-clear').addEventListener('click', () => {
   updateHighlight();
   showBlockHighlight(state.raw, null);
   renderStateView();
+  updateExportButtonMode();
 });
 
 $('#btn-format').addEventListener('click', () => {
@@ -57,15 +59,54 @@ $('#btn-format').addEventListener('click', () => {
   updateHighlight();
   showBlockHighlight(state.raw, null);
   renderStateView();
+  updateExportButtonMode();
 });
 
-$('#btn-export').addEventListener('click', () => {
+// The download/export button doubles as an upload button when the Raw JSON
+// editor is empty — exporting nothing is a dead action, so give that click
+// somewhere useful to go instead.
+const $btnExport = $('#btn-export');
+const $iconExportDownload = $('#icon-export-download');
+const $iconExportUpload = $('#icon-export-upload');
+const $fileUploadInput = $('#file-upload-input');
+
+function updateExportButtonMode() {
+  const isEmpty = !state.raw.trim();
+  $btnExport.title = isEmpty ? 'Upload JSON file' : 'Export JSON as file';
+  $iconExportDownload.classList.toggle('hidden', isEmpty);
+  $iconExportUpload.classList.toggle('hidden', !isEmpty);
+}
+
+$btnExport.addEventListener('click', () => {
+  if (!state.raw.trim()) {
+    $fileUploadInput.click();
+    return;
+  }
   if (state.parsed === undefined) return;
   const blob = new Blob([JSON.stringify(state.parsed, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `json-viewer-${Date.now()}.json`;
   a.click();
+});
+
+$fileUploadInput.addEventListener('change', () => {
+  const file = $fileUploadInput.files[0];
+  $fileUploadInput.value = ''; // allow re-selecting the same file later
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    const text = String(reader.result);
+    $rawInput.value = text;
+    state.raw = text;
+    tryParse(text);
+    updateHighlight();
+    showBlockHighlight(state.raw, null);
+    renderStateView();
+    updateExportButtonMode();
+  };
+  reader.readAsText(file);
 });
 
 $('#btn-copy-raw').addEventListener('click', (e) => {

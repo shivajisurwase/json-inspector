@@ -106,12 +106,18 @@
             </svg>
           </button>
           <button id="btn-export" title="Export JSON as file">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg id="icon-export-download" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
+            <svg id="icon-export-upload" class="hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
           </button>
+          <input type="file" id="file-upload-input" accept=".json,application/json" class="hidden" />
           <button id="btn-clear" title="Clear">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="3 6 5 6 21 6"/>
@@ -127,6 +133,38 @@
       <div id="content">
         <div id="state-view-wrap" class="full-width">
           <div id="raw-editor" class="hidden">
+            <div id="find-replace-bar" class="hidden">
+              <div class="find-replace-row">
+                <input id="find-input" type="text" placeholder="Find" spellcheck="false" />
+                <span id="find-match-count"></span>
+                <button id="btn-find-prev" title="Previous match (Shift+Enter)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="19" x2="12" y2="5"/>
+                    <polyline points="5 12 12 5 19 12"/>
+                  </svg>
+                </button>
+                <button id="btn-find-next" title="Next match (Enter)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <polyline points="19 12 12 19 5 12"/>
+                  </svg>
+                </button>
+                <label class="find-option" title="Match case">
+                  <input id="find-case-sensitive" type="checkbox" /> Aa
+                </label>
+                <button id="btn-find-close" title="Close (Esc)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="find-replace-row">
+                <input id="replace-input" type="text" placeholder="Replace" spellcheck="false" />
+                <button id="btn-replace-one">Replace</button>
+                <button id="btn-replace-all">Replace All</button>
+              </div>
+            </div>
             <div id="raw-gutter"><div id="raw-gutter-inner">1</div></div>
             <div id="raw-editor-scroll">
               <div id="raw-block-highlight" class="hidden"></div>
@@ -338,6 +376,7 @@
   <script src="panel-repair.js"></script>
   <script src="panel-diff.js"></script>
   <script src="panel-escape.js"></script>
+  <script src="panel-find.js"></script>
   <script src="panel-boot.js"></script>
 </body>
 </html>

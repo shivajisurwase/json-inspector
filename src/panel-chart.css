@@ -69,8 +69,8 @@
 
 /* Inline value tspan */
 .chart-val       { font-size: 9px; opacity: .75; }
-.chart-val-str   { fill: #86efac; }
-.chart-val-num   { fill: #fca5a5; }
-.chart-val-bool  { fill: #fdba74; }
+.chart-val-str   { fill: #ce9178; }
+.chart-val-num   { fill: #b5cea8; }
+.chart-val-bool  { fill: #569cd6; }
 .chart-val-null  { fill: var(--text3); font-style: italic; }
 .chart-val-dim   { fill: var(--text3); }

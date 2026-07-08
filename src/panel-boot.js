@@ -9,3 +9,4 @@ try {
 
 updateHighlight();
 renderStateView();
+updateExportButtonMode();
