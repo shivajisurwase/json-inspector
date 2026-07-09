@@ -47,11 +47,19 @@ function recomputeFindMatches() {
   updateFindUi();
 }
 
-/** Select the currently-active match in the textarea and scroll it into view. */
-function selectActiveMatch() {
+/**
+ * Select the currently-active match in the textarea and scroll it into view.
+ * @param {boolean} [keepFocus] - When true, leave focus on whichever element
+ *   currently has it (e.g. the find/replace inputs) instead of moving focus
+ *   to the textarea. Without this, typing into $findInput while matches
+ *   update would steal focus to $rawInput mid-keystroke, so subsequent
+ *   characters land in the textarea (overwriting the selected match) rather
+ *   than continuing to be typed into the find input.
+ */
+function selectActiveMatch(keepFocus) {
   if (findActiveIndex === -1 || !findMatches[findActiveIndex]) return;
   const { start, end } = findMatches[findActiveIndex];
-  $rawInput.focus();
+  if (!keepFocus) $rawInput.focus();
   $rawInput.setSelectionRange(start, end);
 
   // scrollIntoView isn't available on a text range inside a textarea, so
@@ -134,7 +142,7 @@ function openFindBar() {
   $findInput.focus();
   $findInput.select();
   recomputeFindMatches();
-  if (findMatches.length) selectActiveMatch();
+  if (findMatches.length) selectActiveMatch(true);
 }
 
 function closeFindBar() {
@@ -164,12 +172,12 @@ document.addEventListener('keydown', (e) => {
 
 $findInput.addEventListener('input', () => {
   recomputeFindMatches();
-  if (findMatches.length) selectActiveMatch();
+  if (findMatches.length) selectActiveMatch(true);
 });
 
 $findCaseSensitive.addEventListener('change', () => {
   recomputeFindMatches();
-  if (findMatches.length) selectActiveMatch();
+  if (findMatches.length) selectActiveMatch(true);
 });
 
 $findInput.addEventListener('keydown', (e) => {
