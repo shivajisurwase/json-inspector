@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "JSON Inspector",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Beautify and explore JSON as a tree or chart, right inside DevTools.",
 
   "author": "Shivaji Surwase",

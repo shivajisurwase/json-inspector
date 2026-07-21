@@ -123,7 +123,11 @@ function showPathResult(value) {
   $pathInput.classList.remove('no-match');
 
   const isPrimitive = value === null || typeof value !== 'object';
-  $pathResult.textContent = isPrimitive ? formatPrimitive(value) : JSON.stringify(value, null, 2);
+  if (isPrimitive) {
+    $pathResult.textContent = formatPrimitive(value);
+  } else {
+    $pathResult.replaceChildren(highlightJson(JSON.stringify(value, null, 2)));
+  }
   $pathResultWrap.classList.remove('hidden');
 
   lastFoundValue = value;
